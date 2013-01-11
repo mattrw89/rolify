@@ -30,7 +30,7 @@ module Rolify
         raise NotImplementedError.new("You must implement where")
       end
 
-      def find_or_create_by(role_name, resource_type = nil, resource_id = nil)
+      def find_or_create_by(role_name, resource_type = nil, resource_id = nil, relations = [])
         raise NotImplementedError.new("You must implement find_or_create_by")
       end
 
@@ -38,7 +38,7 @@ module Rolify
         raise NotImplementedError.new("You must implement add")
       end
 
-      def remove(relation, role_name, resource = nil)
+      def remove(relation, role_name, resource = nil, relations = [])
         raise NotImplementedError.new("You must implement delete")
       end
 

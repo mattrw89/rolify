@@ -4,6 +4,7 @@ shared_examples_for "#has_role?_examples" do |param_name, param_method|
       it { subject.has_role?("admin".send(param_method)).should be_true }
 
       context "on resource request" do
+
         it { subject.has_role?("admin".send(param_method), Forum.first).should be_true }
         it { subject.has_role?("admin".send(param_method), Forum).should be_true }
         it { subject.has_role?("admin".send(param_method), :any).should be_true }
@@ -85,7 +86,7 @@ shared_examples_for "#has_role?_examples" do |param_name, param_method|
         subject.has_role?("moderator".send(param_method)).should be_false
       end
 
-      it "should not get an instance scoped role when asking for a class scoped" do 
+      it "should not get an instance scoped role when asking for a class scoped" do
         subject.has_role?("moderator".send(param_method), Forum).should be_false
       end
 
@@ -131,5 +132,157 @@ shared_examples_for "#has_role?_examples" do |param_name, param_method|
         end
       end
     end
+
+
+
+#additional relations through organization
+    context "with a global role with an additional relation", :scope => :global_with_org do
+      it { subject.has_role?("admin".send(param_method)).should be_false }
+      it { subject.has_role?("admin".send(param_method), nil, org).should be_true }
+
+      context "on resource request" do
+        it { subject.has_role?("admin".send(param_method), Forum.first, org).should be_true }
+        it { subject.has_role?("admin".send(param_method), Forum.first).should be_false }
+        it { subject.has_role?("admin".send(param_method), Forum, org).should be_true }
+        it { subject.has_role?("admin".send(param_method), Forum).should be_false }
+        it { subject.has_role?("admin".send(param_method), :any, org).should be_true }
+        it { subject.has_role?("admin".send(param_method), :any).should be_false }
+      end
+
+      context "with another global role" do
+        before(:all) { role_class.create(:name => "global") }
+
+        it { subject.has_role?("global".send(param_method), org).should be_false }
+        it { subject.has_role?("global".send(param_method), :any, org).should be_false }
+      end
+
+      it "should not get an instance scoped role" do
+        subject.has_role?("moderator".send(param_method), Group.first, org).should be_false
+        subject.has_role?("moderator".send(param_method), Group.first).should be_false
+      end
+
+      it "should not get a class scoped role" do
+        subject.has_role?("manager".send(param_method), Forum).should be_false
+        subject.has_role?("manager".send(param_method), Forum, org).should be_false
+      end
+
+      context "using inexisting role" do
+        it { subject.has_role?("dummy".send(param_method)).should be_false }
+        it { subject.has_role?("dumber".send(param_method), Forum.first).should be_false }
+      end
+    end
+
+    context "with a class scoped role with an additional relation", :scope => :class_with_org do
+      context "on class scoped role request" do
+        it { subject.has_role?("manager".send(param_method), Forum, org).should be_true }
+        it { subject.has_role?("manager".send(param_method), Forum).should be_false }
+        it { subject.has_role?("manager".send(param_method), Forum.first, org).should be_true }
+        it { subject.has_role?("manager".send(param_method), Forum.first).should be_false }
+        it { subject.has_role?("manager".send(param_method), :any, org).should be_true }
+        it { subject.has_role?("manager".send(param_method), :any).should be_false }
+      end
+
+      it "should not get a scoped role when asking for a global" do
+        subject.has_role?("manager".send(param_method)).should be_false
+      end
+
+      it "should not get a global role" do
+        role_class.create(:name => "admin")
+        subject.has_role?("admin".send(param_method)).should be_false
+      end
+
+      context "with another class scoped role" do
+        context "on the same resource but with a different name" do
+          before(:all) { role_class.create(:name => "member", :resource_type => "Forum") }
+
+          it { subject.has_role?("member".send(param_method), Forum).should be_false }
+          it { subject.has_role?("member".send(param_method), :any).should be_false }
+        end
+
+        context "on another resource with the same name" do
+          before(:all) { role_class.create(:name => "manager", :resource_type => "Group") }
+
+          it { subject.has_role?("manager".send(param_method), Group).should be_false }
+          it { subject.has_role?("manager".send(param_method), :any, org).should be_true }
+        end
+
+        context "on another resource with another name" do
+          before(:all) { role_class.create(:name => "defenders", :resource_type => "Group") }
+
+          it { subject.has_role?("defenders".send(param_method), Group).should be_false }
+          it { subject.has_role?("defenders".send(param_method), :any).should be_false }
+        end
+      end
+
+      context "using inexisting role" do
+        it { subject.has_role?("dummy".send(param_method), Forum).should be_false }
+        it { subject.has_role?("dumber".send(param_method)).should be_false }
+        it { subject.has_role?("dummy".send(param_method), Forum, org).should be_false }
+        it { subject.has_role?("dumber".send(param_method), nil, org).should be_false }
+      end
+    end
+
+    context "with a instance scoped role with an additional relation", :scope => :instance_with_org do
+      context "on instance scoped role request" do
+        it { subject.has_role?("moderator".send(param_method), Forum.first, org).should be_true }
+        it { subject.has_role?("moderator".send(param_method), :any, org).should be_true }
+        it { subject.has_role?("moderator".send(param_method), Forum.first).should be_false }
+        it { subject.has_role?("moderator".send(param_method), :any).should be_false }
+      end
+
+      it "should not get an instance scoped role when asking for a global" do
+        subject.has_role?("moderator".send(param_method)).should be_false
+        subject.has_role?("moderator".send(param_method), nil, org).should be_false
+      end
+
+      it "should not get an instance scoped role when asking for a class scoped" do
+        subject.has_role?("moderator".send(param_method), Forum).should be_false
+        subject.has_role?("moderator".send(param_method), Forum, org).should be_false
+      end
+
+      it "should not get a global role" do
+        role_class.create(:name => "admin")
+        subject.has_role?("admin".send(param_method)).should be_false
+        subject.has_role?("admin".send(param_method), nil, org).should be_false
+      end
+
+      context "with another instance scoped role" do
+        context "on the same resource but with a different role name" do
+          before(:all) { role_class.create(:name => "member", :resource => Forum.first, :organization_id => org.id) }
+
+          it { subject.has_role?("member".send(param_method), Forum.first, org).should be_false }
+          it { subject.has_role?("member".send(param_method), :any, org).should be_false }
+        end
+
+        context "on another resource of the same type but with the same role name" do
+          before(:all) { role_class.create(:name => "moderator", :resource => Forum.last, :organization_id => org.id) }
+
+          it { subject.has_role?("moderator".send(param_method), Forum.last, org).should be_false }
+          it { subject.has_role?("moderator".send(param_method), :any, org).should be_true }
+        end
+
+        context "on another resource of different type but with the same role name" do
+          before(:all) { role_class.create(:name => "moderator", :resource => Group.last, :organization_id => org.id) }
+
+          it { subject.has_role?("moderator".send(param_method), Group.last, org).should be_false }
+          it { subject.has_role?("moderator".send(param_method), :any, org).should be_true }
+        end
+
+        context "on another resource of the same type and with another role name" do
+          before(:all) { role_class.create(:name => "member", :resource => Forum.last, :organization_id => org.id) }
+
+          it { subject.has_role?("member".send(param_method), Forum.last, org).should be_false }
+          it { subject.has_role?("member".send(param_method), :any, org).should be_false }
+        end
+
+        context "on another resource of different type and with another role name" do
+          before(:all) { role_class.create(:name => "member", :resource => Group.first, :organization_id => org.id) }
+
+          it { subject.has_role?("member".send(param_method), Group.first, org).should be_false }
+          it { subject.has_role?("member".send(param_method), :any, org).should be_false }
+        end
+      end
+    end
+
   end
 end

@@ -2,6 +2,7 @@ module Rolify
   module Configure
     @@dynamic_shortcuts = false
     @@orm = "active_record"
+    @@relations = ['organization']
      
     def configure
       yield self if block_given?
@@ -29,6 +30,14 @@ module Rolify
     
     def use_dynamic_shortcuts
       self.dynamic_shortcuts = true #if defined?(Rails::Server) || defined?(Rails::Console)
+    end
+
+    def relations
+      @@relations
+    end
+
+    def relations=(relations)
+      @@relations = relations
     end
 
     def use_defaults

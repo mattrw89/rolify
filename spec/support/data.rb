@@ -20,3 +20,7 @@ Forum.create(:name => "forum 3")
 
 Group.create(:name => "group 1")
 Group.create(:name => "group 2")
+
+#Organizations for added relation in roles table
+Organization.create(:name => "org 1")
+Organization.create(:name => "org 2")

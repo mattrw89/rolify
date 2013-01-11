@@ -29,10 +29,12 @@ shared_examples_for Rolify::Role do
     [ :has_role, :grant, :add_role ].each do |method_alias|
       it { should respond_to(method_alias.to_sym).with(1).arguments }
       it { should respond_to(method_alias.to_sym).with(2).arguments }
+      it { should respond_to(method_alias.to_sym).with(3).arguments }
     end
     
     it { should respond_to(:has_role?).with(1).arguments }
     it { should respond_to(:has_role?).with(2).arguments }
+    it { should respond_to(:has_role?).with(3).arguments }
 
     it { should respond_to(:has_all_roles?) }
     it { should respond_to(:has_all_roles?) }
@@ -43,6 +45,7 @@ shared_examples_for Rolify::Role do
     [ :has_no_role, :revoke, :remove_role ].each do |method_alias|
       it { should respond_to(method_alias.to_sym).with(1).arguments }
       it { should respond_to(method_alias.to_sym).with(2).arguments }
+      it { should respond_to(method_alias.to_sym).with(3).arguments }
     end
 
     it { should_not respond_to(:is_admin?) }
@@ -80,7 +83,7 @@ shared_examples_for Rolify::Role do
   end
   
   context "with a new instance" do
-    let(:user) { user_class.new }
+    let(:user) { user_class.create }
 
     before(:all) do
       user.add_role :admin
@@ -88,9 +91,8 @@ shared_examples_for Rolify::Role do
     end
 
     subject { user }
-    
     it { should have_role :admin }
-    it { should have_role :moderator, Forum.first }    
+    it { should have_role :moderator, Forum.first }
   end  
   
   context "on the Class level ", :scope => :mixed do  

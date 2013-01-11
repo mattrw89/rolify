@@ -9,11 +9,15 @@ load File.dirname(__FILE__) + '/../schema.rb'
 # Standard user and role classes
 class User < ActiveRecord::Base
   rolify
+  has_many :users_organizations
+  has_many :organizations, :through => :users_organizations
 end
 
 class Role < ActiveRecord::Base
   has_and_belongs_to_many :users, :join_table => :users_roles
   belongs_to :resource, :polymorphic => true
+
+  belongs_to :organization
 
   extend Rolify::Adapter::Scopes
 end
@@ -66,4 +70,9 @@ class Group < ActiveRecord::Base
   def subgroups
     Group.where(:parent_id => id)
   end
+end
+
+class Organization < ActiveRecord::Base
+  has_many :roles
+  has_many :users, :through => :users_organizations
 end

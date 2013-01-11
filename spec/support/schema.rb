@@ -1,11 +1,17 @@
 ActiveRecord::Schema.define do
   self.verbose = false
 
-  [ :roles, :privileges, :admin_rights ].each do |table|
+  create_table(:roles) do |t|
+    t.string :name
+    t.references :resource, :polymorphic => true
+    t.references :organization, :default => nil
+  end
+
+  [ :privileges, :admin_rights ].each do |table|
     create_table(table) do |t|
     t.string :name
     t.references :resource, :polymorphic => true
-  
+    t.references :organization
     t.timestamps
     end
   end
@@ -43,5 +49,15 @@ ActiveRecord::Schema.define do
   create_table(:groups) do |t|
     t.integer :parent_id
     t.string :name
+  end
+
+  #added for testing of additional relationships in the Roles table
+  create_table(:organizations) do |t|
+    t.string :name
+  end
+
+  create_table(:users_organizations, :id => false) do |t|
+    t.references :user
+    t.references :organization
   end
 end
